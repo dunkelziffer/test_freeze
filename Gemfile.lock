@@ -1,3 +1,9 @@
+PATH
+  remote: ../frozen_rails
+  specs:
+    frozen_rails (0.0.2)
+      rails (>= 7.2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -374,6 +380,7 @@ DEPENDENCIES
   brakeman
   capybara
   debug
+  frozen_rails!
   importmap-rails
   jbuilder
   kamal
