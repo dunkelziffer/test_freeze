@@ -1,5 +1,7 @@
 # README
 
+A repository for drafting and prototyping the desired HTML output of the `frozen_rails` gem. This serves as a design playground for static site generation templates.
+
 This README would normally document whatever steps are necessary to get the
 application up and running.
 
