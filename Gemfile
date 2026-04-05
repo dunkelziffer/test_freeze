@@ -66,6 +66,7 @@ group :development do
 
   # frozen:ui
   gem "lookbook", ">= 2.3.14"
+  gem "listen"
 
   gem "web-console"
 end

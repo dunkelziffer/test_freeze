@@ -24,4 +24,9 @@ Rails.application.routes.draw do
   if Rails.env.development?
     mount_avo at: "/avo"
   end
+
+  # frozen:ui
+  if Rails.env.development?
+    mount Lookbook::Engine, at: "/lookbook"
+  end
 end
