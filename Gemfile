@@ -64,6 +64,9 @@ group :development do
   # frozen:db
   gem "avo", ">= 3.2"
 
+  # frozen:ui
+  gem "lookbook", ">= 2.3.14"
+
   gem "web-console"
 end
 
