@@ -8,5 +8,8 @@
   "devDependencies": {
     "esbuild": "^0.28.0",
     "esbuild-plugin-import-glob": "^0.1.1"
+  },
+  "dependencies": {
+    "unpoly": "^3.14.1"
   }
 }

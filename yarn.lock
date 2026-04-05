@@ -289,3 +289,8 @@ to-regex-range@^5.0.1:
   integrity sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==
   dependencies:
     is-number "^7.0.0"
+
+unpoly@^3.14.1:
+  version "3.14.1"
+  resolved "https://registry.yarnpkg.com/unpoly/-/unpoly-3.14.1.tgz#d75bee5add182299b3ed8125eb985aed9e886ac3"
+  integrity sha512-8NZlHINBJUP10NA79aOGW4cpWY9uxpojidjNMe1qS7lSfWmzPq3pQw3OQgU4/c22CjMNZygq4NEZEeiF2dO2TA==
