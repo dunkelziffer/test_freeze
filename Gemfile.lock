@@ -444,6 +444,7 @@ DEPENDENCIES
   sqlite_extensions-uuid
   static_db
   tzinfo-data
+  view_component (~> 4.6)
   web-console
 
 CHECKSUMS
