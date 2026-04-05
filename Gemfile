@@ -32,6 +32,11 @@ gem "image_processing", "~> 1.2"
 
 gem "frozen_rails" # , path: "../frozen_rails"
 
+# frozen:db
+gem "static_db"
+gem "sqlite_extensions-uuid"
+gem "friendly_id"
+
 # frozen:ssg
 gem "parklife-rails"
 
@@ -56,7 +61,9 @@ group :development, :test do
 end
 
 group :development do
-  # Use console on exceptions pages [https://github.com/rails/web-console]
+  # frozen:db
+  gem "avo", ">= 3.2"
+
   gem "web-console"
 end
 

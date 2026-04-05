@@ -19,4 +19,9 @@ Rails.application.routes.draw do
     resources :categories, param: :slug, only: [ :index, :show ]
   end
   resources :pages, param: :slug, only: [ :show ]
+
+  # frozen:db
+  if Rails.env.development?
+    mount_avo at: "/avo"
+  end
 end

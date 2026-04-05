@@ -1,0 +1,10 @@
+<p style="color: green"><%%= notice %></p>
+
+<%%= render @<%= singular_table_name %> %>
+
+<div>
+  <%%= link_to "Back to <%= human_name.pluralize.downcase %>", <%= index_helper(type: :path) %> %>
+  <%% if Rails.env.development? %>
+    <%%= link_to "Edit", avo.resources_<%= show_helper(type: :path) %> %>
+  <%% end %>
+</div>
