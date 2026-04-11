@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%= stylesheet_link_tag 'jasmine' %>
+    <link href="<%= asset_path('jasmine_favicon.png') %>" rel="icon" type="image/png">
+  </head>
+
+  <body>
+    <%= yield %>
+    <%= javascript_include_tag 'jasmine' %>
+  </body>
+</html>

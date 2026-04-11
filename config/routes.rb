@@ -26,7 +26,8 @@ Rails.application.routes.draw do
   end
 
   # frozen:ui
-  if Rails.env.development?
+  if Rails.env.local?
     mount Lookbook::Engine, at: "/lookbook"
+    get "jasmine" => "jasmine#index", as: :jasmine
   end
 end

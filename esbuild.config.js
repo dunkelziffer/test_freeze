@@ -30,8 +30,8 @@ const config = {
   format: 'esm',
   outdir,
   publicPath: '/assets',
-  // entryNames: '[name]',
-  // assetNames: '[name]',
+  entryNames: '[name]',
+  assetNames: '[name]',
   loader: {
     '.css': 'css',
     '.ico': 'copy',
