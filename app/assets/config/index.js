@@ -1,3 +1,4 @@
+import "./theme"
 import "./unpoly"
-import "./rouge"
 import "./view_component"
+import "./rouge"
