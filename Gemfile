@@ -47,6 +47,9 @@ gem "kramdown-parser-gfm"
 gem "rouge"
 
 group :development, :test do
+  # frozen:ui
+  gem "lookbook", ">= 2.3.14"
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
@@ -65,7 +68,6 @@ group :development do
   gem "avo", ">= 3.2"
 
   # frozen:ui
-  gem "lookbook", ">= 2.3.14"
   gem "listen"
 
   gem "web-console"
