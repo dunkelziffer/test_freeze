@@ -6,7 +6,7 @@ class CounterComponentPreview < ViewComponent::Preview
   #
   # @label Custom
   # @param initial_value [Integer]
-  def custom(initial_value: 42)
+  def custom(initial_value: 0)
     render CounterComponent.new(initial_value: initial_value)
   end
 
@@ -17,13 +17,15 @@ class CounterComponentPreview < ViewComponent::Preview
     render CounterComponent.new
   end
 
+  # @label Manually set
   def forty_two
     render CounterComponent.new(initial_value: 42)
   end
 
+  # @!endgroup
+
+  # @hidden
   def negative_one
     render CounterComponent.new(initial_value: -1)
   end
-
-  # @!endgroup
 end
