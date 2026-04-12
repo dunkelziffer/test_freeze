@@ -28,4 +28,27 @@ class CounterComponentPreview < ViewComponent::Preview
   def negative_one
     render CounterComponent.new(initial_value: -1)
   end
+
+  # @!group I18n
+
+  # @label English
+  def english
+    I18n.with_locale(:en) do
+      render CounterComponent.new(label: true)
+    end
+  end
+
+  # Caution
+  # ---
+  # Getting too sophisticated within a preview isn't supported:
+  # - [https://github.com/lookbook-hq/lookbook/issues/793](https://github.com/lookbook-hq/lookbook/issues/793)
+  #
+  # @label German [Lookbook BUG, see Notes tab]
+  def i18n
+    I18n.with_locale(:de) do
+      render CounterComponent.new(label: true)
+    end
+  end
+
+  # @!endgroup
 end
