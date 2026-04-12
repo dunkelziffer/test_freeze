@@ -1,1 +1,1 @@
-import './rouge.css'
+import "./rouge"
