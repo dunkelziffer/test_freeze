@@ -51,5 +51,11 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
 
+  # frozen:ui
   config.lookbook.preview_paths = [ "test/components" ]
+  config.lookbook.preview_collection_label = "Components"
+  config.lookbook.page_collection_label = "Docs"
+  config.lookbook.page_route = "docs"
+  config.lookbook.page_paths = [ "test/components/docs" ]
+  config.lookbook.ui_theme = "zinc"
 end
