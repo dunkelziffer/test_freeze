@@ -44,7 +44,7 @@ class CounterComponentPreview < ViewComponent::Preview
   # - [https://github.com/lookbook-hq/lookbook/issues/793](https://github.com/lookbook-hq/lookbook/issues/793)
   #
   # @label German [Lookbook BUG, see Notes tab]
-  def i18n
+  def german
     I18n.with_locale(:de) do
       render CounterComponent.new(label: true)
     end
