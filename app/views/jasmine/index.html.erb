@@ -6,4 +6,14 @@
       </template>
     <% end %>
   <% end %>
+
+  <!--
+    This is a manual test scenario with multiple top-level tags to verify that the test framework can handle it.
+    Neither the ViewComponent::Preview nor Lookbook::Preview classes support multiple top-level tags, but if you
+    need such a test case, you can define it directly in the Jasmine layout as shown here.
+  -->
+  <template data-component="manual_test" data-scenario="with_multiple_top_level_tags">
+    <h1>Heading</h1>
+    <p>Paragraph</p>
+  </template>
 </div>
