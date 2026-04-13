@@ -36,9 +36,16 @@ module TestFreeze
     # frozen:db
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid
-      g.test_framework nil
+      # g.test_framework nil
       g.helper nil
     end
     config.active_storage.draw_routes = true
+
+    # frozen:ui
+    config.i18n.available_locales = [ :en ]
+    config.view_component.parent_class = "ApplicationComponent"
+    config.view_component.generate.preview = true
+    config.view_component.generate.preview_path = "test/components"
+    config.view_component.generate.locale = true
   end
 end
