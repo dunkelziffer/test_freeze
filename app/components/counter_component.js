@@ -14,6 +14,7 @@ up.compiler('[data-compiler="counter"]', (element, { initialValue }) => {
 
   const changeValue = (delta) => {
     value += delta
+    console.log('Value changed to', value)
     updateDisplay()
   }
 
@@ -27,5 +28,6 @@ up.compiler('[data-compiler="counter"]', (element, { initialValue }) => {
 
   updateDisplay()
 
+  console.log('Counter component initialized with value', value)
   return destructors
 })

@@ -1,5 +1,6 @@
 import { build, context, formatMessages } from 'esbuild'
 import esbuildPluginImportGlob from 'esbuild-plugin-import-glob'
+import esbuildPluginTextReplace from 'esbuild-plugin-text-replace'
 const { default: importGlob } = esbuildPluginImportGlob
 
 const path = await import('path')
@@ -13,7 +14,6 @@ if (!fs.existsSync(outdir)) { fs.mkdirSync(outdir) }
 
 async function handleErrors(errors) {
   const formattedErrors = await formatMessages(errors, { kind: 'error' })
-  debugger
   const output = formattedErrors.join('\n')
 
   if (output) {
@@ -45,6 +45,12 @@ const config = {
     '.woff2': 'file',
   },
   plugins: [
+    esbuildPluginTextReplace({
+      include: /jasmine-core\/lib\/jasmine-core\/jasmine\.js/,
+      pattern: [
+        ['let jasmineRequire;', 'let jasmineRequire; const global = window;'],
+      ]
+    }),
     importGlob(),
     {
       name: 'handleErrors',
