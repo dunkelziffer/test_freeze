@@ -1,1 +1,5 @@
-compile
+up.compiler('[data-compiler="<%= file_path.gsub('/', '-') %>"]', (element, <%= up_data_params %>) => {
+<% js_attributes.each do |attribute| -%>
+  const <%= attribute %>Element = element.querySelector('[data-element="<%= file_path.gsub('/', '-') %>:<%= attribute %>"]')
+<% end -%>
+})
