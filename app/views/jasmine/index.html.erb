@@ -1,6 +1,6 @@
 <div class="test-cases">
   <% Lookbook.previews.each do |preview| %>
-    <% preview.scenarios.each do |scenario| %>
+    <% preview.send(:scenario_entities).each do |scenario| %>
       <template data-test-case="<%= preview.lookup_path %>--<%= scenario.name %>">
         <%= render_preview_scenario(preview, scenario) %>
       </template>
