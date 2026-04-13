@@ -7,3 +7,11 @@
     <% end %>
   <% end %>
 </div>
+
+<div class="view-component-test-cases">
+  <% CounterComponentPreview.examples.each do |scenario| %>
+    <template data-test-case-vc="vc-counter--<%= scenario %>">
+      <%= render_preview(scenario, from: CounterComponentPreview) %>
+    </template>
+  <% end %>
+</div>
