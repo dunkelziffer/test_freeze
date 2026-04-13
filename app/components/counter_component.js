@@ -1,33 +1,24 @@
 up.compiler('[data-compiler="counter"]', (element, { initialValue }) => {
   const display = element.querySelector('[data-element="counter:value"]')
-  const decrement = element.querySelector('[data-element="counter:decrement"]')
-  const increment = element.querySelector('[data-element="counter:increment"]')
+  const decrementButton = element.querySelector('[data-element="counter:decrement"]')
+  const incrementButton = element.querySelector('[data-element="counter:increment"]')
 
-  let destructors = []
   let value = Number(initialValue || 0)
 
   const updateDisplay = () => {
-    if (display) {
-      display.textContent = value
-    }
+    display.textContent = value
   }
 
   const changeValue = (delta) => {
     value += delta
-    console.log('Value changed to', value)
     updateDisplay()
   }
 
-  if (decrement) {
-    destructors.push(up.on(decrement, 'click', () => changeValue(-1)))
-  }
-
-  if (increment) {
-    destructors.push(up.on(increment, 'click', () => changeValue(1)))
-  }
+  const destructors = [
+    up.on(decrementButton, 'click', () => changeValue(-1)),
+    up.on(incrementButton, 'click', () => changeValue(1))
+  ]
 
   updateDisplay()
-
-  console.log('Counter component initialized with value', value)
   return destructors
 })

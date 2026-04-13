@@ -1,11 +1,9 @@
 const fixturesContainer = () => {
-  console.log('Accessing fixtures container')
   return document.getElementById('fixtures') || up.element.affix(document.body, '#fixtures')
 }
 
 
 afterEach(() => {
-  console.log('Cleaning up fixtures')
   up.destroy('#fixtures')
 })
 
