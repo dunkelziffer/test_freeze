@@ -80,3 +80,5 @@ group :test do
 end
 
 gem "view_component", "~> 4.6"
+
+gem "reactionview", "~> 0.3.0"
