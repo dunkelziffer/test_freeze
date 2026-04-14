@@ -1,4 +1,4 @@
-import "./vars.css"
+import "./variables.css"
 import "./base.css"
 import "./typography.css"
 import "./forms.css"
