@@ -6,6 +6,8 @@
     "build": "node esbuild.config.js"
   },
   "devDependencies": {
+    "@herb-tools/formatter": "^0.9.6",
+    "@herb-tools/linter": "^0.9.6",
     "esbuild": "^0.28.0",
     "esbuild-plugin-import-glob": "^0.1.1",
     "esbuild-plugin-text-replace": "^1.3.0",
