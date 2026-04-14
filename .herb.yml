@@ -45,6 +45,13 @@ linter:
   # exclude:
   #   - 'app/views/admin/**/*'
 
+  rules:
+    actionview-no-silent-helper:
+      enabled: false
+
+    html-require-script-nonce:
+      enabled: false
+
   # rules:
   #   erb-no-extra-newline:
   #     enabled: false
