@@ -1,6 +1,7 @@
 import { build, context, formatMessages } from 'esbuild'
 import esbuildPluginImportGlob from 'esbuild-plugin-import-glob'
 import esbuildPluginTextReplace from 'esbuild-plugin-text-replace'
+// import manifestPlugin from 'esbuild-manifest-plugin'
 const { default: importGlob } = esbuildPluginImportGlob
 
 const path = await import('path')
@@ -23,15 +24,33 @@ async function handleErrors(errors) {
   }
 }
 
+const externalImagesPlugin = {
+  name: 'external-images',
+  setup(build) {
+    build.onResolve({ filter: /\.(png|jpe?g|svg|webp|ico|woff2?|ttf)$/ }, args => {
+      // If it's coming from node_modules → bundle it
+      if (args.path.includes('node_modules')) return;
+
+      // Otherwise mark as external
+      return {
+        path: path.resolve(args.resolveDir, args.path),
+        external: true,
+      };
+    });
+  },
+};
+
 const config = {
   entryPoints: ['app/assets/*.js'],
   bundle: true,
   sourcemap: true,
   format: 'esm',
+  // absWorkingDir: process.cwd(), // required for manifest plugin to generate correct paths
   outdir,
   publicPath: '/assets',
-  entryNames: '[name]',
-  assetNames: '[name]',
+  entryNames: '[dir]/[name]',
+  assetNames: '[dir]/[name]',
+  // external: ['*.ico', '*.jpg', '*.png', '*.svg', '*.webp', '*.json', '*.ttf', '*.woff', '*.woff2'],
   loader: {
     '.css': 'css',
     '.ico': 'copy',
@@ -45,6 +64,7 @@ const config = {
     '.woff2': 'file',
   },
   plugins: [
+    externalImagesPlugin,
     esbuildPluginTextReplace({
       include: /jasmine-core\/lib\/jasmine-core\/jasmine\.js/,
       pattern: [
@@ -52,6 +72,7 @@ const config = {
       ]
     }),
     importGlob(),
+    // manifestPlugin(),
     {
       name: 'handleErrors',
       setup: (build) => {

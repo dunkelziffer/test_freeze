@@ -182,6 +182,11 @@ core-js@^3.4.1:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.49.0.tgz#8b4d520ac034311fa21aa616f017ada0e0dbbddd"
   integrity sha512-es1U2+YTtzpwkxVLwAFdSpaIMyQaq0PBgm3YD1W3Qpsn1NAmO3KSgZfu+oGSWVu6NvLHoHCV/aYcsE5wiB7ALg==
 
+esbuild-manifest-plugin@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/esbuild-manifest-plugin/-/esbuild-manifest-plugin-0.2.0.tgz#97d54efc9ba8fc84967d1ed4683f6a1fad703997"
+  integrity sha512-ejm/okIZwpPjZbl//nntc7y/Dr5PJ3X6mhlyu8TqMtygQGVat77Puh0DDKUp/M8KTn5WkZRJgbITCX+wNmeppQ==
+
 esbuild-plugin-import-glob@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/esbuild-plugin-import-glob/-/esbuild-plugin-import-glob-0.1.1.tgz#6ab5ad992aa67ba9b1aa80c0759d5617960cd5c3"
