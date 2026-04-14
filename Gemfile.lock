@@ -461,6 +461,7 @@ DEPENDENCIES
   decant
   friendly_id
   frozen_rails
+  herb
   image_processing (~> 1.2)
   jbuilder
   jsbundling-rails
