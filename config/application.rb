@@ -42,7 +42,7 @@ module TestFreeze
     config.active_storage.draw_routes = true
 
     # frozen:ui
-    config.i18n.available_locales = [ :en ]
+    config.i18n.available_locales = [ :en, :de ]
     config.view_component.parent_class = "ApplicationComponent"
     config.view_component.generate.preview = true
     config.view_component.generate.preview_path = "test/components"
