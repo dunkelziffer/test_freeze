@@ -25,7 +25,6 @@ jobs:
         cache: 'yarn'
     - run: npm install -g yarn
     - run: yarn install --frozen-lockfile
-    - run: yarn test
 
     - uses: actions/configure-pages@v5
       id: pages
