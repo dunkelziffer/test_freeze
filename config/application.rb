@@ -2,6 +2,11 @@ require_relative "boot"
 
 require "rails/all"
 
+# frozen:ssg
+if ARGV.first == "build"
+  require "parklife-rails/activestorage"
+end
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
