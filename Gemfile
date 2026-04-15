@@ -32,6 +32,9 @@ gem "image_processing", "~> 1.2"
 
 gem "frozen_rails" # , path: "../frozen_rails"
 
+# frozen:ui
+gem "view_component"
+
 # frozen:db
 gem "static_db"
 gem "sqlite_extensions-uuid"
@@ -47,6 +50,9 @@ gem "kramdown-parser-gfm"
 gem "rouge"
 
 group :development, :test do
+  # frozen:ui
+  gem "lookbook"
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
@@ -61,6 +67,9 @@ group :development, :test do
 end
 
 group :development do
+  # frozen:ui
+  gem "listen"
+
   # frozen:db
   gem "avo", ">= 3.2"
 
