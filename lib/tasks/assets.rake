@@ -5,7 +5,7 @@ end
 namespace :assets do
   desc "Build frontend assets with yarn"
   task :precompile do
-    system("yarn build")
+    system("yarn build", exception: true)
   end
 end
 
