@@ -22,6 +22,22 @@
   </head>
 
   <body>
-    <%= yield %>
+    <header>
+      <nav>
+        <h1>
+          Munich Rubyshift
+        </h1>
+<ul><li><%= link_to "Artikel", categories_path %></li><li><%= link_to "Mitglieder", users_path %></li></ul>
+      </nav>
+    </header>
+    <main>
+      <select>
+        <option>A</option>
+      </select>
+      <%= yield %>
+    </main>
+    <footer>
+      <%= link_to "Impressum", "/imprint" %>
+    </footer>
   </body>
 </html>

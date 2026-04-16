@@ -1,0 +1,7 @@
+---
+FriendlyId::Slug_1:
+  id: 6a885175-1e99-49bc-9b91-dc42244b387f
+  created_at: '2026-04-15 22:34:04.377083'
+  slug: klaus
+  sluggable_id: bdc15db1-f3c6-41a9-bd06-b6ee71028b1a
+  sluggable_type: User

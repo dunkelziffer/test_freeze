@@ -46,5 +46,7 @@ module TestFreeze
     config.view_component.generate.preview = true
     config.view_component.generate.preview_path = "test/components"
     config.view_component.generate.locale = true
+
+    config.asset_path = "/assets"
   end
 end

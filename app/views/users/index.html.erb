@@ -1,0 +1,20 @@
+<% content_for :title, "Users" %>
+
+<h1>Users</h1>
+
+<% if Rails.env.development? %>
+  <p>
+    <%= link_to "✏️", avo.resources_users_path, "up-follow": false %>
+  </p>
+<% end %>
+
+<ul id="users">
+  <% @users.each do |user| %>
+    <li>
+      <%= render user %>
+      <p>
+        <%= link_to "Show this user", user %>
+      </p>
+    </li>
+  <% end %>
+</ul>

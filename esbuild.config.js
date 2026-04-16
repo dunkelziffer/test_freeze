@@ -1,13 +1,14 @@
 import { build, context, formatMessages } from 'esbuild'
 import esbuildPluginImportGlob from 'esbuild-plugin-import-glob'
 import esbuildPluginTextReplace from 'esbuild-plugin-text-replace'
+import manifestPlugin from 'esbuild-manifest-plugin'
 const { default: importGlob } = esbuildPluginImportGlob
 
 const path = await import('path')
 const fs = await import('fs')
 
 const railsEnv = process.env.RAILS_ENV || 'development'
-const outdir = path.join(process.cwd(), 'app/assets/builds')
+const outdir = path.join(process.cwd(), 'public/assets')
 const errorFilePath = path.join(outdir, `esbuild_error_${railsEnv}.txt`)
 
 if (!fs.existsSync(outdir)) { fs.mkdirSync(outdir) }
@@ -24,14 +25,20 @@ async function handleErrors(errors) {
 }
 
 const config = {
-  entryPoints: ['app/assets/*.js'],
+  entryPoints: [
+    'application.js',
+    'jasmine.js',
+    'static.js'
+  ],
   bundle: true,
   sourcemap: true,
   format: 'esm',
   outdir,
+  absWorkingDir: path.join(process.cwd(), 'app/assets'),
+  metafile: true,
   publicPath: '/assets',
-  entryNames: '[name]',
-  assetNames: '[name]',
+  entryNames: '[dir]/[name]-[hash]',
+  assetNames: '[dir]/[name]-[hash]',
   loader: {
     '.css': 'css',
     '.ico': 'copy',
@@ -40,6 +47,7 @@ const config = {
     '.svg': 'copy',
     '.webp': 'copy',
     '.json': 'copy',
+    '.md': 'copy',
     '.ttf': 'file',
     '.woff': 'file',
     '.woff2': 'file',
@@ -52,6 +60,7 @@ const config = {
       ]
     }),
     importGlob(),
+    manifestPlugin(),
     {
       name: 'handleErrors',
       setup: (build) => {

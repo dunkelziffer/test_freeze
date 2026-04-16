@@ -1,0 +1,11 @@
+<% content_for :title, "User: #{@user.slug}" %>
+
+<%= render @user %>
+
+<% if Rails.env.development? %>
+  <p>
+    <%= link_to "✏️", avo.resources_user_path(@user), "up-follow": false %>
+  </p>
+<% end %>
+
+<%= link_to "Back to all users", users_path %>

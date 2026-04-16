@@ -3,3 +3,4 @@
 
 import './images/**/*'
 import 'jasmine-core/images/jasmine_favicon.png'
+import './pages/**/*'
