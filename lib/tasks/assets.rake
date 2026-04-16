@@ -10,5 +10,5 @@ namespace :assets do
 end
 
 if Rake::Task.task_defined?("test:prepare")
-  Rake::Task["test:prepare"].enhance(["assets:precompile"])
+  Rake::Task["test:prepare"].enhance([ "assets:precompile" ])
 end
