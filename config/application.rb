@@ -30,7 +30,7 @@ module TestFreeze
     # config.eager_load_paths << Rails.root.join("extras")
 
     # frozen:md
-    config.assets.paths << Rails.root.join("content")
+    # config.assets.paths << Rails.root.join("content")
     config.action_dispatch.rescue_responses["Decant::FileNotFound"] = :not_found
 
     # frozen:db
