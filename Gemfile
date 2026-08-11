@@ -33,6 +33,11 @@ gem "ruby-vips"
 
 gem "frozen_rails" # , path: "../frozen_rails"
 
+# frozen:db
+gem "static_db"
+gem "sqlite_extensions-uuid"
+gem "friendly_id"
+
 # frozen:ssg
 gem "parklife-rails"
 
@@ -43,6 +48,9 @@ gem "kramdown-parser-gfm"
 gem "rouge"
 
 group :development, :test do
+  # frozen:db
+  gem "avo", ">= 3.2"
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
