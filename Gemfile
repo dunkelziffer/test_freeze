@@ -29,6 +29,7 @@ gem "bootsnap", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 2"
+gem "ruby-vips"
 
 gem "frozen_rails" # , path: "../frozen_rails"
 
