@@ -19,7 +19,7 @@ module TestFreeze
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w[assets tasks])
+    config.autoload_lib(ignore: %w[assets generators tasks templates])
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -32,5 +32,12 @@ module TestFreeze
     # frozen:md
     config.assets.paths << Rails.root.join("content")
     config.action_dispatch.rescue_responses["Decant::FileNotFound"] = :not_found
+
+    # frozen:db
+    config.generators do |g|
+      g.orm :active_record, primary_key_type: :string
+      g.helper nil
+    end
+    config.active_storage.draw_routes = true
   end
 end
