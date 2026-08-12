@@ -35,7 +35,7 @@ gem "frozen_rails" # , path: "../frozen_rails"
 
 # frozen:ui
 gem "view_component"
-gem "precompiled_assets"
+gem "precompiled_assets", path: "vendor/gems/precompiled_assets"
 
 # frozen:db
 gem "static_db"
