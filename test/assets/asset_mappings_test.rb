@@ -15,16 +15,16 @@ class AssetMappingsTest < ActiveSupport::TestCase
   # The audit environment stands in for the environments the mapping declares.
   AUDITED_ENVIRONMENT = "test".freeze
 
-  test "declared load paths match what the gems register" do
+  test "declared asset paths match what the gems register" do
     registered = registrations_by_gem
 
     mapped_gems.each do |mapping|
       assert_equal(
-        mapping["loadPaths"].sort,
+        mapping["assetPaths"].map { |asset_path| asset_path["path"] }.sort,
         registered.fetch(mapping["gem"], []).sort,
-        "config/asset_mappings.json lists different loadPaths for #{mapping["gem"]} than " \
+        "config/asset_mappings.json lists different assetPaths for #{mapping["gem"]} than " \
         "the gem registers. Reconcile the JSON with the gem, then check whether any newly " \
-        "registered directory also needs an `entries` mapping."
+        "registered directory also needs a manifestEntries mapping."
       )
     end
   end
@@ -39,15 +39,15 @@ class AssetMappingsTest < ActiveSupport::TestCase
     )
   end
 
-  test "every mapped source matches at least one file" do
+  test "every mapped source glob matches at least one file" do
     mapped_gems.each do |mapping|
       root = Pathname(Gem.loaded_specs.fetch(mapping["gem"]).full_gem_path)
 
-      mapping["entries"].each do |entry|
+      mapping["manifestEntries"].each do |entry|
         assert_not_empty(
-          Pathname.glob(root.join(entry["source"])).select(&:file?),
-          "#{mapping["gem"]}: source #{entry["source"]} matches no files. It was probably " \
-          "moved or renamed in the gem."
+          Pathname.glob(root.join(entry["sourceGlob"])).select(&:file?),
+          "#{mapping["gem"]}: sourceGlob #{entry["sourceGlob"]} matches no files. It was " \
+          "probably moved or renamed in the gem."
         )
       end
     end

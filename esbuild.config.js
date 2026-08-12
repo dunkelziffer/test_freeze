@@ -33,11 +33,32 @@ function gemRoot(name) {
   }
 }
 
-// Expand a `some/dir/base.*` source into the concrete files it matches. Source
-// maps are skipped: esbuild regenerates its own.
-function expandSource(root, source) {
-  const directory = path.join(root, path.dirname(source))
-  const pattern = path.basename(source)
+// Gem files are handed to esbuild under a virtual path rather than their location
+// on disk, because esbuild puts the paths it is given into what it emits: as the
+// `/* source */` banner atop a bundle, and as the output filename of anything
+// copied out. Real paths would publish the build machine's directory layout in
+// assets served to browsers.
+const GEM_ASSET_NAMESPACE = 'gem-asset'
+
+// Assets that become an output file of their own, named after the path esbuild
+// was given, rather than being parsed and inlined into a bundle.
+const EMITTED_ASSET = /\.(?:eot|ttf|woff2?|png|jpe?g|gif|svg|webp|ico|avif)$/i
+
+function gemAssetSpecifier(gem, relativeToRoot) {
+  return `${GEM_ASSET_NAMESPACE}:${gem}/${relativeToRoot}`
+}
+
+function gemAssetLoader(file) {
+  if (path.extname(file) === '.css') return 'css'
+
+  return EMITTED_ASSET.test(file) ? 'file' : 'js'
+}
+
+// Expand a `some/dir/base.*` glob into the concrete files it matches. Source maps
+// are skipped: esbuild regenerates its own.
+function expandSource(root, sourceGlob) {
+  const directory = path.join(root, path.dirname(sourceGlob))
+  const pattern = path.basename(sourceGlob)
 
   if (!pattern.includes('*')) {
     return fs.existsSync(path.join(directory, pattern)) ? [path.join(directory, pattern)] : []
@@ -53,7 +74,7 @@ function expandSource(root, source) {
 }
 
 const mappedEntryPoints = []
-const gemLoadPaths = [] // [gemRoot, [absolute load path, ...]]
+const gemAssetPaths = [] // { gem, root, assetPaths: [relative to gem root, ...] }
 
 for (const mapping of gemAssetMappings) {
   if (!mapping.railsEnvironments.includes(railsEnv)) continue
@@ -61,47 +82,99 @@ for (const mapping of gemAssetMappings) {
   const root = gemRoot(mapping.gem)
   if (!root) continue
 
-  gemLoadPaths.push([root, mapping.loadPaths.map(relative => path.join(root, relative))])
+  gemAssetPaths.push({
+    gem: mapping.gem,
+    root,
+    // Longest first, so the most specific asset path wins when several nest.
+    assetPaths: mapping.assetPaths
+      .map(assetPath => assetPath.path)
+      .sort((a, b) => b.length - a.length),
+  })
 
-  for (const { source, target } of mapping.entries) {
-    for (const file of expandSource(root, source)) {
+  for (const { sourceGlob, logicalName } of mapping.manifestEntries) {
+    for (const file of expandSource(root, sourceGlob)) {
       const stem = path.basename(file, path.extname(file))
-      mappedEntryPoints.push({ in: file, out: target.replace('*', stem) })
+
+      mappedEntryPoints.push({
+        // Images and fonts are copied verbatim to the name `logicalName` gives
+        // them, so nothing of their origin survives and they can be read straight
+        // off disk. Anything esbuild parses gets a `/* source */` banner naming
+        // the file it came from, which is why those go through a virtual path.
+        in: EMITTED_ASSET.test(file) ? file : gemAssetSpecifier(mapping.gem, path.relative(root, file)),
+        out: logicalName.replace('*', stem),
+      })
     }
   }
 }
 
-// Reproduces the load path lookup a pipeline would do on the gem's behalf. A gem
-// stylesheet referencing `url(fonts/foo.woff2)` means the *logical* path
-// `<its own logical dir>/fonts/foo.woff2`, resolved against every registered load
-// path — not a sibling file. esbuild only knows relative and node resolution, so
-// without this the reference fails to resolve. Keyed off the importer, so the
-// app's own assets keep esbuild's normal resolution.
-const gemAssetLoadPaths = {
-  name: 'gemAssetLoadPaths',
+// Resolves gem-owned assets the way a Rails asset pipeline would have on the
+// gem's behalf. Scoped to files that came from a gem, so the app's own assets
+// keep esbuild's normal resolution.
+const gemAssetResolver = {
+  name: 'gemAssetResolver',
   setup(build) {
-    build.onResolve({ filter: /.*/ }, ({ path: requested, importer }) => {
-      if (!importer) return
+    function gemAsset(owner, relativeToRoot, virtualPath) {
+      return {
+        path: virtualPath,
+        namespace: GEM_ASSET_NAMESPACE,
+        pluginData: {
+          gem: owner.gem,
+          relativeToRoot,
+          file: path.join(owner.root, relativeToRoot),
+        },
+      }
+    }
 
-      const owner = gemLoadPaths.find(([root]) => importer.startsWith(root + path.sep))
-      if (!owner) return
+    // Entry points, named by config/asset_mappings.json.
+    build.onResolve({ filter: new RegExp(`^${GEM_ASSET_NAMESPACE}:`) }, ({ path: specifier }) => {
+      const virtualPath = specifier.slice(GEM_ASSET_NAMESPACE.length + 1)
+      const separator = virtualPath.indexOf('/')
+      const gem = virtualPath.slice(0, separator)
+      const owner = gemAssetPaths.find(candidate => candidate.gem === gem)
 
-      const [, loadPaths] = owner
-      const base = loadPaths.find(loadPath => importer.startsWith(loadPath + path.sep))
-      if (!base) return
+      return gemAsset(owner, virtualPath.slice(separator + 1), virtualPath)
+    })
 
-      const logicalDirectory = path.dirname(path.relative(base, importer))
-      const logical = path.normalize(
-        path.join(logicalDirectory, requested.replace(/[?#].*$/, ''))
-      )
+    // Anything those files go on to reference. A gem stylesheet asking for
+    // `url(fonts/foo.woff2)` does not mean a sibling file: it means the *logical*
+    // path `<its own logical directory>/fonts/foo.woff2`, looked up across every
+    // one of the gem's asset paths. esbuild knows only relative and node
+    // resolution, so do that lookup here.
+    build.onResolve(
+      { filter: /.*/, namespace: GEM_ASSET_NAMESPACE },
+      ({ path: requested, pluginData }) => {
+        const owner = gemAssetPaths.find(candidate => candidate.gem === pluginData.gem)
+        const base = owner.assetPaths.find(assetPath =>
+          pluginData.relativeToRoot.startsWith(assetPath + path.sep)
+        )
+        if (!base) return
 
-      for (const loadPath of loadPaths) {
-        const candidate = path.join(loadPath, logical)
-        if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
-          return { path: candidate }
+        const logicalDirectory = path.dirname(path.relative(base, pluginData.relativeToRoot))
+        const logical = path.normalize(
+          path.join(logicalDirectory, requested.replace(/[?#].*$/, ''))
+        )
+
+        for (const assetPath of owner.assetPaths) {
+          const relativeToRoot = path.join(assetPath, logical)
+          if (!fs.existsSync(path.join(owner.root, relativeToRoot))) continue
+
+          // esbuild drops the directory of a virtual path when naming an output,
+          // so emitted assets get a flattened name qualified by their gem, both
+          // to stay readable and to not collide with the app's own assets.
+          const virtualPath = EMITTED_ASSET.test(logical)
+            ? `${owner.gem}--${logical.replaceAll(path.sep, '-')}`
+            : `${owner.gem}/${relativeToRoot}`
+
+          return gemAsset(owner, relativeToRoot, virtualPath)
         }
       }
-    })
+    )
+
+    build.onLoad({ filter: /.*/, namespace: GEM_ASSET_NAMESPACE }, ({ pluginData }) => ({
+      contents: fs.readFileSync(pluginData.file),
+      loader: gemAssetLoader(pluginData.file),
+      pluginData,
+    }))
   },
 }
 
@@ -166,7 +239,7 @@ const config = {
       ]
     }),
     importGlob(),
-    gemAssetLoadPaths,
+    gemAssetResolver,
     manifestPlugin(),
     {
       name: 'handleErrors',
