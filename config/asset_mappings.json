@@ -1,30 +1,17 @@
 {
   "$comment": [
     "Assets owned by gems that expect a Rails asset pipeline, mapped into our esbuild build.",
-    "Read by esbuild.config.js and by test/assets/asset_mappings_test.rb, so neither side",
-    "has to know anything about the other. The only runtime link between Ruby and JS is the",
-    "`bundle info <gem> --path` call esbuild makes to locate each gem.",
+    "Shared by esbuild.config.js and test/assets/asset_mappings_test.rb; `bundle info <gem> --path`",
+    "is the only runtime link between them. Paths are relative to the gem root.",
     "",
-    "The two lists answer different questions, so they do not line up one to one.",
+    "assetPaths mirrors `config.assets.paths`: where a gem's assets are found, and what the audit",
+    "test asserts. manifestEntries is what Ruby names and so needs a manifest key. The two do not",
+    "line up — assets referenced from a gem's own CSS or JS arrive through assetPaths alone.",
     "",
-    "assetPaths is where a gem's assets can be *found*. It mirrors what the gem pushes into",
-    "`config.assets.paths`, is asserted against the real registration by the audit test, and is",
-    "the space the esbuild resolver searches when a gem's own stylesheet references something",
-    "by logical path. Paths are relative to the gem root.",
+    "logicalName is the helper argument minus its extension; `*` becomes the file's basename.",
     "",
-    "manifestEntries is what has to be *addressable from Ruby*, and so needs a manifest key. An",
-    "asset earns one only if Ruby names it. Assets reached from inside a gem's own CSS or JS",
-    "arrive through assetPaths instead, and assets read straight off disk need neither.",
-    "",
-    "`logicalName` is the name Ruby passes to a helper, minus the extension; a `*` in it is",
-    "replaced by the matched file's basename. These are the gem's own logical names, the way",
-    "Propshaft would resolve them — `avo/logo` for `image_tag \"avo/logo.png\"`. precompiled_assets",
-    "looks under `images/` first for typed helpers and falls back to the undecorated name, so one",
-    "entry per asset answers both typed and untyped lookups.",
-    "",
-    "Known limitation: the audit only sees what a gem registers explicitly. Propshaft also adds",
-    "every engine's app/assets/* children implicitly; assets relying on that (Avo's empty",
-    "avo-overrides files) are not covered here. We ship our own avo-overrides instead."
+    "The audit sees only explicit registrations; Propshaft also adds each engine's app/assets/*",
+    "implicitly. We ship our own avo-overrides rather than rely on that."
   ],
   "gems": [
     {
@@ -32,53 +19,30 @@
       "railsEnvironments": ["development", "test"],
       "assetPaths": [
         {
-          "$comment": "Avo's own prebuilt CSS and JS. Gives them the logical names its layout asks for, e.g. avo/application.css.",
+          "$comment": "Prebuilt CSS and JS, under the logical names Avo's layout asks for.",
           "path": "app/assets/builds"
         },
         {
-          "$comment": [
-            "Logos and favicons — and the root that resolves Avo's webfonts. Its stylesheet has the",
-            "logical name avo/application.css, so a `url(fonts/inter-…)` inside it means the logical",
-            "path avo/fonts/inter-…, which lives here. That is why the built font is emitted as",
-            "avo--avo-fonts-inter-… : the flattened logical path."
-          ],
+          "$comment": "Logos and favicons. Also resolves the webfonts: avo/application.css asks for url(fonts/…), meaning logical avo/fonts/…",
           "path": "app/assets/images"
         },
         {
-          "$comment": [
-            "Icons that avo-icons inlines into the HTML, reading them off disk through its own",
-            "Avo::Icons.configuration.custom_paths. They are never fetched over HTTP, so they get no",
-            "manifestEntries — one would emit 49 digested files nothing ever requests."
-          ],
+          "$comment": "Icons avo-icons inlines from disk. Never fetched over HTTP, so no manifestEntries.",
           "path": "app/assets/svgs"
         },
         {
-          "$comment": [
-            "Registered by Avo so the bare logical name fonts/inter-… resolves, the way Sprockets",
-            "would. Propshaft reaches the fonts through app/assets/images instead, and so do we, so",
-            "nothing actually resolves through this one. It is listed because the audit test asserts",
-            "equality with what Avo registers, not with what we happen to use."
-          ],
+          "$comment": "Sprockets-style path for a bare fonts/… lookup. Unused here; listed to match what Avo registers.",
           "path": "app/assets/images/avo"
         }
       ],
       "manifestEntries": [
         {
-          "$comment": [
-            "Named by Avo's layout: stylesheet_link_tag \"avo/dependencies\" and \"avo/application\",",
-            "javascript_include_tag \"avo/application\", and \"avo/late-registration\" from",
-            "Avo::AssetManager::JavascriptComponent. avo.custom.js is built too and goes unreferenced;",
-            "only importmap apps link it, via Avo's install generator."
-          ],
+          "$comment": "e.g. stylesheet_link_tag \"avo/application\". Also builds the unreferenced avo.custom.js.",
           "sourceGlob": "app/assets/builds/avo/*",
           "logicalName": "avo/*"
         },
         {
-          "$comment": [
-            "Named by Avo's appearance defaults, e.g. image_tag \"avo/logo.png\" and the favicons its",
-            "_appearance partial reaches for. The webfonts one directory down are deliberately absent:",
-            "the stylesheet above already pulls them in, and an entry here would emit them a second time."
-          ],
+          "$comment": "e.g. image_tag \"avo/logo.png\". Webfonts one directory down are excluded: the stylesheet already pulls them in.",
           "sourceGlob": "app/assets/images/avo/*",
           "logicalName": "avo/*"
         }
