@@ -85,9 +85,13 @@ for (const mapping of gemAssetMappings) {
   gemAssetPaths.push({
     gem: mapping.gem,
     root,
-    // Longest first, so the most specific asset path wins when several nest.
     assetPaths: mapping.assetPaths
+      // Registered by the gem but never resolved through here. Dropping them
+      // keeps the claim honest: a path wrongly marked fails to resolve, rather
+      // than quietly working anyway.
+      .filter(assetPath => !assetPath.auditOnly)
       .map(assetPath => assetPath.path)
+      // Longest first, so the most specific asset path wins when several nest.
       .sort((a, b) => b.length - a.length),
   })
 
