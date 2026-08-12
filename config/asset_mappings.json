@@ -1,0 +1,57 @@
+{
+  "$comment": [
+    "Assets owned by gems that expect a Rails asset pipeline, mapped into our esbuild build.",
+    "Shared by esbuild.config.js and test/assets/asset_mappings_test.rb; `bundle info <gem> --path`",
+    "is the only runtime link between them. Paths are relative to the gem root.",
+    "",
+    "assetPaths mirrors `config.assets.paths`: where a gem's assets are found, and what the audit",
+    "test asserts. manifestEntries is what Ruby names and so needs a manifest key. The two do not",
+    "line up — assets referenced from a gem's own CSS or JS arrive through assetPaths alone.",
+    "",
+    "auditOnly marks a path the gem registers but our build never resolves through. esbuild skips",
+    "those, so the flag is load-bearing: mark a path that is actually needed and the build fails.",
+    "",
+    "logicalName is the helper argument minus its extension; `*` becomes the file's basename.",
+    "",
+    "The audit sees only explicit registrations; Propshaft also adds each engine's app/assets/*",
+    "implicitly. We ship our own avo-overrides rather than rely on that."
+  ],
+  "gems": [
+    {
+      "gem": "avo",
+      "railsEnvironments": ["development", "test"],
+      "assetPaths": [
+        {
+          "$comment": "Prebuilt CSS and JS, under the logical names Avo's layout asks for.",
+          "path": "app/assets/builds"
+        },
+        {
+          "$comment": "Logos and favicons. Also resolves the webfonts: avo/application.css asks for url(fonts/…), meaning logical avo/fonts/…",
+          "path": "app/assets/images"
+        },
+        {
+          "$comment": "These icons get inlined by avo-icons from disk.",
+          "path": "app/assets/svgs",
+          "auditOnly": true
+        },
+        {
+          "$comment": "Sprockets-style path for a bare \"fonts/…\" lookup. We reach the fonts via app/assets/images instead.",
+          "path": "app/assets/images/avo",
+          "auditOnly": true
+        }
+      ],
+      "manifestEntries": [
+        {
+          "$comment": "e.g. stylesheet_link_tag(\"avo/application\")",
+          "sourceGlob": "app/assets/builds/avo/*",
+          "logicalName": "avo/*"
+        },
+        {
+          "$comment": "e.g. image_tag(\"avo/logo.png\"). Glob is not recursive, so webfonts one directory down are excluded. The stylesheet already pulls them in.",
+          "sourceGlob": "app/assets/images/avo/*",
+          "logicalName": "avo/*"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+/node_modules/
+
+# FORK DIVERGENCE: upstream ignores /dist/ because it is built at publish time.
+# This fork is consumed directly from the working tree via `link:` in the app's
+# package.json, so the built output is committed — otherwise a fresh clone would
+# have to install this package's devDependencies before the app could build.
+# Rebuild with `node build.mjs` after touching src/, and drop this hunk when
+# upstreaming.
+
+/package-lock.json
+/yarn.lock
