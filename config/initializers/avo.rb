@@ -14,38 +14,9 @@ else
   return
 end
 
-# == Static assets ==
-# Avo 3 shipped its assets in the gem's `public/` dir and mounted a Rack::Static
-# over them. Avo 4 dropped both and registers `app/assets` with the host app's
-# asset pipeline instead — but that initializer is a no-op here, since it is
-# guarded by `app.config.respond_to?(:assets)` and we run esbuild rather than
-# Sprockets or Propshaft. So serve the images out of the gem ourselves.
-#
-# Note that Rack::Static's Array form never strips the matched prefix; it passes
-# PATH_INFO to Rack::Files untouched. The URL prefix therefore has to mirror the
-# gem's own directory layout.
-avo_assets_prefix = "/images/avo"
-avo_gem_assets_root = Pathname(Gem.loaded_specs.fetch("avo").full_gem_path).join("app/assets")
-
-Rails.application.config.middleware.use(
-  Rack::Static,
-  urls: [avo_assets_prefix],
-  root: avo_gem_assets_root
-)
-
-# Avo's stylesheet references its webfonts relatively and esbuild leaves those
-# URLs alone (see external: ['fonts/*'] in esbuild.config.js), so the browser
-# resolves them against the built CSS and asks for /assets/avo/fonts/. Map each
-# one onto the gem with Rack::Static's Hash form, which does rewrite PATH_INFO.
-avo_font_urls = avo_gem_assets_root.join("images/avo/fonts").children.to_h do |font|
-  ["/assets/avo/fonts/#{font.basename}", "#{avo_assets_prefix}/fonts/#{font.basename}"]
-end
-
-Rails.application.config.middleware.use(
-  Rack::Static,
-  urls: avo_font_urls,
-  root: avo_gem_assets_root
-)
+# Avo's own assets are declared in config/asset_mappings.json and built by
+# esbuild, so its stock appearance defaults ("avo/logo.png" and friends) resolve
+# through our manifest unchanged and nothing needs configuring here.
 
 # For more information regarding these settings check out our docs https://docs.avohq.io
 # The values disaplayed here are the default ones. Uncomment and change them to fit your needs.
@@ -211,22 +182,6 @@ Avo.configure do |config|
   # config.model_generator_hook = true
 
   ## == Appearance ==
-  # Avo's defaults are logical asset names ("avo/logo.png") resolved through the
-  # asset pipeline. We don't have one — `precompiled_assets` overrides
-  # `compute_asset_path` and raises UnknownAsset for anything missing from the
-  # esbuild manifest, and these images never enter that manifest. Rails skips
-  # `compute_asset_path` entirely for sources starting with "/", so absolute
-  # paths bypass the resolver; avo_assets_prefix below serves them.
-  config.appearance = {
-    logo: "#{avo_assets_prefix}/logo.png",
-    logo_dark: "#{avo_assets_prefix}/logo-dark.png",
-    logomark: "#{avo_assets_prefix}/logomark.png",
-    logomark_dark: "#{avo_assets_prefix}/logomark-dark.png",
-    favicon: "#{avo_assets_prefix}/favicon.ico",
-    favicon_dark: "#{avo_assets_prefix}/favicon-dark.ico",
-    placeholder: "#{avo_assets_prefix}/placeholder.svg",
-  }
-
   # config.appearance = {
   #   logo: "avo/logo.png",
   #   logo_dark: "avo/logo-dark.png",

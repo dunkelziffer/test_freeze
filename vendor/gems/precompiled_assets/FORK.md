@@ -20,7 +20,9 @@ See `vendor/javascript/esbuild-manifest-plugin/FORK.md` for the JS half.
 
 ## Divergences from upstream
 
-- None yet.
+- `compute_asset_path` falls back to the undecorated logical path, and
+  `Resolver#resolve` takes several candidates. See the CHANGELOG's unreleased
+  section — both are meant for upstreaming as-is.
 
 ## Working on this fork
 

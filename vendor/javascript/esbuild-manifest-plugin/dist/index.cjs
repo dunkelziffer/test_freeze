@@ -40,7 +40,10 @@ function manifestPlugin(options = {}) {
       if (absWorkingDir === void 0) {
         throw buildError("absWorkingDir option is required");
       }
-      const entryNames = collectEntryNames(entryPoints);
+      const entries = collectEntryPoints(entryPoints);
+      const entriesByInput = new Map(
+        entries.map((entry) => [(0, import_node_path.relative)(absWorkingDir, (0, import_node_path.resolve)(absWorkingDir, entry.input)), entry])
+      );
       const manifestFilePath = (0, import_node_path.join)(outdir, filename);
       const relativeOutDir = (0, import_node_path.relative)(absWorkingDir, outdir);
       build.initialOptions.metafile = true;
@@ -53,7 +56,7 @@ function manifestPlugin(options = {}) {
       function getEntryPointsManifest(outputs) {
         const manifest = {};
         const paths = Object.keys(outputs).map((outputPath) => (0, import_node_path.relative)(relativeOutDir, outputPath));
-        for (const entrypoint of entryNames) {
+        for (const { name: entrypoint } of entries) {
           const name2 = entrypoint.replace(/\.js$/, "");
           const escapedName = name2.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&");
           const hashRegex = "[A-Z0-9]{8,}";
@@ -63,6 +66,13 @@ function manifestPlugin(options = {}) {
           const cssPath = paths.find((path) => cssRegExp.test(path));
           manifest[`${name2}.js`] = jsPath;
           manifest[`${name2}.css`] = cssPath;
+        }
+        for (const [outputPath, { entryPoint }] of Object.entries(outputs)) {
+          if (entryPoint === void 0) continue;
+          const entry = entriesByInput.get(entryPoint);
+          if (entry === void 0) continue;
+          const name2 = entry.name.replace(/\.js$/, "");
+          manifest[`${name2}${(0, import_node_path.extname)(outputPath)}`] = (0, import_node_path.relative)(relativeOutDir, outputPath);
         }
         return manifest;
       }
@@ -94,14 +104,16 @@ function manifestPlugin(options = {}) {
 function buildError(message) {
   return new Error(`${name}: ${message}`);
 }
-function collectEntryNames(entryPoints) {
+function collectEntryPoints(entryPoints) {
   if (entryPoints === void 0) {
     throw buildError("entryPoints option is required");
   }
   if (Array.isArray(entryPoints)) {
-    return entryPoints.map((entry) => typeof entry === "string" ? entry : entry.out);
+    return entryPoints.map(
+      (entry) => typeof entry === "string" ? { input: entry, name: entry } : { input: entry.in, name: entry.out }
+    );
   }
-  return Object.keys(entryPoints);
+  return Object.entries(entryPoints).map(([name2, input]) => ({ input, name: name2 }));
 }
 module.exports = Object.assign(module.exports.default, module.exports);
 //# sourceMappingURL=index.cjs.map

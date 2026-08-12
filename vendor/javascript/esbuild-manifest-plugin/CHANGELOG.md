@@ -1,7 +1,14 @@
 # esbuild-manifest-plugin Change Log
 
 ## Unreleased changes
-*
+
+* Include entrypoints whose output is neither JavaScript nor CSS. An entrypoint
+  can be an image or a font (`loader: 'copy'` / `'file'`), which previously
+  produced an output file with no manifest entry: entrypoints were only ever
+  matched by guessing the `.js`/`.css` pair their name implied. Such outputs are
+  now matched through the metafile and keyed by the declared output name plus the
+  extension esbuild chose, so `{ in: 'logo.png', out: 'images/logo' }` yields
+  `"images/logo.png"`. Works for inputs outside `absWorkingDir`.
 
 ## 2.0.0 (2026-05-11)
 

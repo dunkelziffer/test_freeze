@@ -51,7 +51,9 @@ gem "kramdown"
 gem "kramdown-parser-gfm"
 gem "rouge"
 
-group :development, :test do
+# :asset_audit is a boot-only environment used by the asset mapping audit test.
+# It has to see the same asset-shipping gems as :test.
+group :development, :test, :asset_audit do
   # frozen:ui
   gem "lookbook"
 

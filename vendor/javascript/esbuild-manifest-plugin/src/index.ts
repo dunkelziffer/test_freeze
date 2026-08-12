@@ -1,9 +1,16 @@
 import { writeFileSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { extname, join, relative, resolve } from 'node:path'
 import type { BuildOptions, Metafile, Plugin } from 'esbuild'
 
 type Outputs = Metafile['outputs']
 type Manifest = Record<string, string | undefined>
+
+interface EntryPoint {
+  /** Input path as configured; may be absolute or relative to `absWorkingDir`. */
+  input: string
+  /** Declared output name; manifest keys are derived from it. */
+  name: string
+}
 
 export interface ManifestPluginOptions {
   /** Manifest filename written into `outdir`. Default: `"manifest.json"`. */
@@ -38,7 +45,13 @@ export default function manifestPlugin(options: ManifestPluginOptions = {}): Plu
         throw buildError('absWorkingDir option is required')
       }
 
-      const entryNames = collectEntryNames(entryPoints)
+      const entries = collectEntryPoints(entryPoints)
+
+      // Keyed the way esbuild reports entry points in the metafile, so outputs
+      // can be traced back to the entry that declared them.
+      const entriesByInput = new Map<string, EntryPoint>(
+        entries.map(entry => [relative(absWorkingDir, resolve(absWorkingDir, entry.input)), entry]),
+      )
 
       const manifestFilePath = join(outdir, filename)
       const relativeOutDir = relative(absWorkingDir, outdir)
@@ -56,7 +69,7 @@ export default function manifestPlugin(options: ManifestPluginOptions = {}): Plu
         const manifest: Manifest = {}
         const paths = Object.keys(outputs).map(outputPath => relative(relativeOutDir, outputPath))
 
-        for (const entrypoint of entryNames) {
+        for (const { name: entrypoint } of entries) {
           const name = entrypoint.replace(/\.js$/, '')
           const escapedName = name.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')
           const hashRegex = '[A-Z0-9]{8,}'
@@ -69,6 +82,21 @@ export default function manifestPlugin(options: ManifestPluginOptions = {}): Plu
 
           manifest[`${name}.js`] = jsPath
           manifest[`${name}.css`] = cssPath
+        }
+
+        // The pass above can only guess at the JS/CSS pair an entry name implies,
+        // which is all an entry point used to be able to produce. An entry point
+        // can also be an image or a font (loader: 'copy' / 'file'), so match those
+        // through the metafile, which names the entry each output came from, and
+        // key them by the declared output name plus the extension esbuild chose.
+        for (const [outputPath, { entryPoint }] of Object.entries(outputs)) {
+          if (entryPoint === undefined) continue
+
+          const entry = entriesByInput.get(entryPoint)
+          if (entry === undefined) continue
+
+          const name = entry.name.replace(/\.js$/, '')
+          manifest[`${name}${extname(outputPath)}`] = relative(relativeOutDir, outputPath)
         }
 
         return manifest
@@ -113,8 +141,8 @@ function buildError(message: string): Error {
   return new Error(`${name}: ${message}`)
 }
 
-// Normalises the three forms that esbuild accepts for `entryPoints` into a
-// flat list of output names so the rest of the plugin can iterate uniformly.
+// Normalises the three forms that esbuild accepts for `entryPoints` into a flat
+// list of input/output pairs so the rest of the plugin can iterate uniformly.
 //
 // Array example:
 //   entryPoints: ['home.ts', 'settings.ts'],
@@ -131,12 +159,16 @@ function buildError(message: string): Error {
 // See https://esbuild.github.io/api/#entry-points
 // (and https://github.com/evanw/esbuild/blob/6a794dff68e6a43539f6da671e3080efdf11ca70/lib/shared/common.ts#L362 for the last undocumented variant)
 
-function collectEntryNames(entryPoints: BuildOptions['entryPoints']): string[] {
+function collectEntryPoints(entryPoints: BuildOptions['entryPoints']): EntryPoint[] {
   if (entryPoints === undefined) {
     throw buildError('entryPoints option is required')
   }
   if (Array.isArray(entryPoints)) {
-    return entryPoints.map(entry => (typeof entry === 'string' ? entry : entry.out))
+    return entryPoints.map(entry =>
+      typeof entry === 'string'
+        ? { input: entry, name: entry }
+        : { input: entry.in, name: entry.out },
+    )
   }
-  return Object.keys(entryPoints)
+  return Object.entries(entryPoints).map(([name, input]) => ({ input, name }))
 }

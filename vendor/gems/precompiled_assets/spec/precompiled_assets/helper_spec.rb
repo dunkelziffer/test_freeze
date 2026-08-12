@@ -41,6 +41,43 @@ describe PrecompiledAssets::Helper do
       expect { host.compute_asset_path('missing.js') }
         .to raise_error(PrecompiledAssets::Resolver::UnknownAsset)
     end
+
+    it 'names both candidates when neither is in the manifest' do
+      expect { host.compute_asset_path('missing.png', type: :image) }
+        .to raise_error(
+          PrecompiledAssets::Resolver::UnknownAsset,
+          /Could not find "images\/missing.png" or "missing.png"/,
+        )
+    end
+
+    # Propshaft ignores the asset type and looks a logical path up as given, so
+    # gems written against it list an asset once under the name they pass to both
+    # typed and untyped helpers.
+    context 'with an asset listed under its undecorated logical path' do
+      # The resolver memoizes its manifest on the current thread, so it has to be
+      # dropped for a spec-local manifest to be seen.
+      before do
+        Thread.current['PrecompiledAssets::Helper#asset_resolver'] = nil
+
+        AssetFixtures.write_manifest(
+          'avo/favicon.ico' => 'avo/favicon-ZP2622XE.ico',
+          'images/example.png' => 'images/example-5N2N2WJM.png',
+          'example.png' => 'example-AAAAAAAA.png',
+        )
+      end
+
+      after { Thread.current['PrecompiledAssets::Helper#asset_resolver'] = nil }
+
+      it 'falls back to it when the directory-prefixed path is unknown' do
+        expect(host.compute_asset_path('avo/favicon.ico', type: :image))
+          .to eq('/assets-test/avo/favicon-ZP2622XE.ico')
+      end
+
+      it 'still prefers the directory-prefixed path when both are listed' do
+        expect(host.compute_asset_path('example.png', type: :image))
+          .to eq('/assets-test/images/example-5N2N2WJM.png')
+      end
+    end
   end
 
   describe '#asset_resolver' do

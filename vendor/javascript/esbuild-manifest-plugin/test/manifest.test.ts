@@ -127,6 +127,43 @@ describe('manifestPlugin', () => {
       expect(readManifest()['bundle.js']).toBe('bundle.js')
     })
 
+    it('handles an entrypoint whose output is neither JS nor CSS', async () => {
+      await esbuild.build({
+        absWorkingDir: join(fixturesDir, 'with-copy'),
+        entryPoints: [{ in: 'logo.svg', out: 'images/logo' }],
+        entryNames: '[dir]/[name]-[hash]',
+        bundle: true,
+        outdir,
+        loader: { '.svg': 'copy' },
+        plugins: [manifestPlugin()],
+      })
+
+      const manifest = readManifest()
+      expect(manifest['images/logo.svg']).toMatch(/^images\/logo-[A-Z0-9]{8,}\.svg$/)
+      expect(existsSync(join(outdir, manifest['images/logo.svg']!))).toBe(true)
+    })
+
+    it('handles an entrypoint whose input lives outside absWorkingDir', async () => {
+      await esbuild.build({
+        absWorkingDir: join(fixturesDir, 'simple'),
+        entryPoints: [
+          { in: join(fixturesDir, 'with-copy', 'logo.svg'), out: 'images/logo' },
+          { in: join(fixturesDir, 'with-css', 'application.js'), out: 'vendor/application' },
+        ],
+        entryNames: '[dir]/[name]-[hash]',
+        bundle: true,
+        outdir,
+        loader: { '.svg': 'copy' },
+        plugins: [manifestPlugin()],
+      })
+
+      const manifest = readManifest()
+      expect(manifest['images/logo.svg']).toMatch(/^images\/logo-[A-Z0-9]{8,}\.svg$/)
+      expect(manifest['vendor/application.js']).toMatch(/^vendor\/application-[A-Z0-9]{8,}\.js$/)
+      expect(manifest['vendor/application.css']).toMatch(/^vendor\/application-[A-Z0-9]{8,}\.css$/)
+      expect(existsSync(join(outdir, manifest['images/logo.svg']!))).toBe(true)
+    })
+
     it('throws an error when entryPoints is not set', async () => {
       await expect(
         esbuild.build({

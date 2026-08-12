@@ -13,6 +13,11 @@ test:
   <<: *default
   database: storage/test.sqlite3
 
+# Boot-only environment for the asset mapping audit; see config/environments/asset_audit.rb.
+asset_audit:
+  <<: *default
+  database: storage/asset_audit.sqlite3
+
 production:
   primary:
     <<: *default

@@ -19,7 +19,11 @@ gem) be given clean output names and manifest keys.
 
 ## Divergences from upstream
 
-- `.gitignore`: `/dist/` is committed here. See the note in that file.
+- Entrypoints whose output is neither JS nor CSS are now included in the
+  manifest. See the CHANGELOG's unreleased section — this one is meant for
+  upstreaming as-is.
+- `.gitignore`: `/dist/` is committed here. See the note in that file. This one
+  is local-only; drop it when upstreaming.
 
 ## Working on this fork
 
