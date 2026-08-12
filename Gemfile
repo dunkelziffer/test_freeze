@@ -56,7 +56,7 @@ group :development, :test do
   gem "lookbook"
 
   # frozen:db
-  gem "avo", ">= 3.2"
+  gem "avo", ">= 3.32", ">= 4"
 
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
