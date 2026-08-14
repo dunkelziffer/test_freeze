@@ -12,9 +12,11 @@ build:
   stage: build
   script:
     - apt-get update -yqqq
-    - apt-get install -y nodejs libvips
+    - apt-get install -y nodejs npm libvips
     - bundle config set path 'vendor'
     - bundle install
+    - npm install -g yarn
+    - yarn install --frozen-lockfile
     - bin/static-build
   artifacts:
     paths:

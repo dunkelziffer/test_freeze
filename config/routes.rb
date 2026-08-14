@@ -24,4 +24,10 @@ Rails.application.routes.draw do
   if defined?(Avo)
     mount_avo at: "/avo"
   end
+
+  # frozen:ui
+  if Rails.env.local?
+    mount Lookbook::Engine, at: "/lookbook"
+    resources :jasmine, only: [ :index ]
+  end
 end
